@@ -15,4 +15,10 @@ use Modules\Lesson\Http\Controllers\LessonController;
 |
 */
 
-Route::resource('lesson', LessonController::class)->except(['create', 'edit']);
+// Route::resource('lesson', LessonController::class)->except(['create', 'edit']);
+
+Route::get('lesson', [LessonController::class, 'index']);
+Route::post('lesson', [LessonController::class, 'store']);
+Route::get('lesson/{id}', [LessonController::class, 'show']);
+Route::post('lesson/{id}', [LessonController::class, 'update']);
+Route::delete('lesson/{id}', [LessonController::class, 'destroy']);

@@ -18,7 +18,6 @@ class CourseController extends Controller
      */
     public function index()
     {
-
         $data = Course::all();
         return CourseResource::collection($data);
     }
@@ -32,6 +31,7 @@ class CourseController extends Controller
     {
 
         $data = Course::create($request->all());
+
         return new CourseResource($data);
     }
 
@@ -43,6 +43,7 @@ class CourseController extends Controller
     public function show($id)
     {
         $course = Course::findOrFail($id);
+
         return new CourseResource($course);
     }
 
@@ -54,12 +55,9 @@ class CourseController extends Controller
      */
     public function update(CourseRequest $request, $id)
     {
-
-
-        $course = Course::findOrFail($id);
+        $course       = Course::findOrFail($id);
         $course->name = $request->name;
         $course->title = $request->title;
-        $course->photo = $request->photo;
         $course->save();
 
         return  $this->success("Course update successfully");

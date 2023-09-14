@@ -3,9 +3,10 @@
 namespace Modules\Lesson\Http\Controllers;
 
 use App\Models\Lesson;
-use App\Http\Controllers\Controller;
-use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Contracts\Support\Renderable;
 use Modules\Lesson\Http\Requests\LessonRequest;
 use Modules\Lesson\Transformers\LessonResource;
 
@@ -29,9 +30,13 @@ class LessonController extends Controller
      */
     public function store(LessonRequest $request)
     {
-        $data = Lesson::create($request->all());
+        $data = $request->all();
+        if ($request->file('photo')) {
+            $data['photo'] =   Storage::putFile('lesson', $request->file('photo'));
+        }
+        $store =   Lesson::create($data);
 
-        return new LessonResource($data);
+        return new LessonResource($store);
     }
 
     /**
@@ -54,10 +59,16 @@ class LessonController extends Controller
     public function update(LessonRequest $request, $id)
     {
         $lesson = Lesson::findOrFail($id);
+
+        if ($request->file('photo')) {
+            if ($lesson->photo) {
+                Storage::delete($lesson->photo);
+            }
+            $lesson->photo =   Storage::putFile('lesson', $request->file('photo'));
+        }
+
         $lesson->title = $request->title;
         $lesson->name = $request->name;
-        $lesson->photo = $request->photo;
-
         $lesson->save();
 
         return  $this->success("Lesson update successfully");
@@ -71,6 +82,10 @@ class LessonController extends Controller
     public function destroy($id)
     {
         $lesson = Lesson::findOrFail($id);
+
+        if ($lesson->photo) {
+            Storage::delete($lesson->photo);
+        }
         $lesson->delete();
 
         return  $this->success("Lesson deleted successfully");
