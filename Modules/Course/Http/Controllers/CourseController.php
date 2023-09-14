@@ -2,21 +2,15 @@
 
 namespace Modules\Course\Http\Controllers;
 
-use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-use Modules\Course\Repository\CourseRepository;
+use App\Http\Controllers\Controller;
+use App\Models\Course;
+use Illuminate\Contracts\Support\Renderable;
+use Modules\Course\Http\Requests\CourseRequest;
 use Modules\Lesson\Transformers\CourseResource;
 
 class CourseController extends Controller
 {
-
-    private CourseRepository $course;
-
-    public function __construct()
-    {
-        $this->course = new CourseRepository();
-    }
 
     /**
      * Display a listing of the resource.
@@ -24,24 +18,21 @@ class CourseController extends Controller
      */
     public function index()
     {
-        $data =  $this->course->courses();
 
+        $data = Course::all();
         return CourseResource::collection($data);
     }
-
-
 
     /**
      * Store a newly created resource in storage.
      * @param Request $request
      * @return Renderable
      */
-    public function store(Request $request)
+    public function store(CourseRequest $request)
     {
-        $data = $request->all();
-        $course = $this->course->create($data);
 
-        return new CourseResource($course);
+        $data = Course::create($request->all());
+        return new CourseResource($data);
     }
 
     /**
@@ -51,7 +42,7 @@ class CourseController extends Controller
      */
     public function show($id)
     {
-        $course = $this->course->findOrFail($id);
+        $course = Course::findOrFail($id);
         return new CourseResource($course);
     }
 
@@ -61,10 +52,16 @@ class CourseController extends Controller
      * @param int $id
      * @return Renderable
      */
-    public function update(Request $request, $id)
+    public function update(CourseRequest $request, $id)
     {
-        $data = $request->all();
-        $this->course->update($id, $data);
+
+
+        $course = Course::findOrFail($id);
+        $course->name = $request->name;
+        $course->title = $request->title;
+        $course->save();
+
+        return  $this->success("Course update successfully");
     }
 
     /**
@@ -74,7 +71,9 @@ class CourseController extends Controller
      */
     public function destroy($id)
     {
-        $course = $this->course->findOrFail($id);
+        $course = Course::findOrFail($id);
         $course->delete();
+
+        return  $this->success("Course deleted successfully");
     }
 }
