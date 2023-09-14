@@ -2,12 +2,12 @@
 
 namespace Modules\Course\Http\Controllers;
 
+use App\Models\Course;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Course;
 use Illuminate\Contracts\Support\Renderable;
 use Modules\Course\Http\Requests\CourseRequest;
-use Modules\Lesson\Transformers\CourseResource;
+use Modules\Course\Transformers\CourseResource;
 
 class CourseController extends Controller
 {
@@ -59,6 +59,7 @@ class CourseController extends Controller
         $course = Course::findOrFail($id);
         $course->name = $request->name;
         $course->title = $request->title;
+        $course->photo = $request->photo;
         $course->save();
 
         return  $this->success("Course update successfully");

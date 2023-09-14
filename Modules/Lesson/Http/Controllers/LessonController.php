@@ -2,9 +2,12 @@
 
 namespace Modules\Lesson\Http\Controllers;
 
+use App\Models\Lesson;
+use App\Http\Controllers\Controller;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use Modules\Lesson\Http\Requests\LessonRequest;
+use Modules\Lesson\Transformers\LessonResource;
 
 class LessonController extends Controller
 {
@@ -14,26 +17,21 @@ class LessonController extends Controller
      */
     public function index()
     {
-        return view('lesson::index');
+        $data = Lesson::all();
+        return LessonResource::collection($data);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
-    {
-        return view('lesson::create');
-    }
 
     /**
      * Store a newly created resource in storage.
      * @param Request $request
      * @return Renderable
      */
-    public function store(Request $request)
+    public function store(LessonRequest $request)
     {
-        //
+        $data = Lesson::create($request->all());
+
+        return new LessonResource($data);
     }
 
     /**
@@ -43,17 +41,8 @@ class LessonController extends Controller
      */
     public function show($id)
     {
-        return view('lesson::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
-    {
-        return view('lesson::edit');
+        $lesson = Lesson::findOrFail($id);
+        return new LessonResource($lesson);
     }
 
     /**
@@ -62,9 +51,16 @@ class LessonController extends Controller
      * @param int $id
      * @return Renderable
      */
-    public function update(Request $request, $id)
+    public function update(LessonRequest $request, $id)
     {
-        //
+        $lesson = Lesson::findOrFail($id);
+        $lesson->title = $request->title;
+        $lesson->name = $request->name;
+        $lesson->photo = $request->photo;
+
+        $lesson->save();
+
+        return  $this->success("Lesson update successfully");
     }
 
     /**
@@ -74,6 +70,9 @@ class LessonController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $lesson = Lesson::findOrFail($id);
+        $lesson->delete();
+
+        return  $this->success("Lesson deleted successfully");
     }
 }
