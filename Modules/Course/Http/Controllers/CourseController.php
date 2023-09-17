@@ -5,6 +5,7 @@ namespace Modules\Course\Http\Controllers;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Support\Renderable;
 use Modules\Course\Http\Requests\CourseRequest;
 use Modules\Course\Transformers\CourseResource;
@@ -30,9 +31,14 @@ class CourseController extends Controller
     public function store(CourseRequest $request)
     {
 
-        $data = Course::create($request->all());
+        $data = $request->all();
 
-        return new CourseResource($data);
+        if ($request->file('photo')) {
+            $data['photo'] =   Storage::putFile('course', $request->file('photo'));
+        }
+        $store = Course::create($data);
+
+        return new CourseResource($store);
     }
 
     /**
@@ -56,6 +62,12 @@ class CourseController extends Controller
     public function update(CourseRequest $request, $id)
     {
         $course       = Course::findOrFail($id);
+        if ($request->file('photo')) {
+            if ($course->photo) {
+                Storage::delete($course->photo);
+            }
+            $course->photo =   Storage::putFile('course', $request->file('photo'));
+        }
         $course->name = $request->name;
         $course->title = $request->title;
         $course->save();
@@ -71,6 +83,10 @@ class CourseController extends Controller
     public function destroy($id)
     {
         $course = Course::findOrFail($id);
+
+        if ($course->photo) {
+            Storage::delete($course->photo);
+        }
         $course->delete();
 
         return  $this->success("Course deleted successfully");

@@ -2,6 +2,7 @@
 
 namespace Modules\Course\Transformers;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseResource extends JsonResource
@@ -17,7 +18,17 @@ class CourseResource extends JsonResource
         return [
             'id'    => $this->id,
             'name'  => $this->name,
-            'title' => $this->title
+            'title' => $this->title,
+            'photo' => $this->getPhoto($this->photo),
         ];
+    }
+
+    public function getPhoto($photo)
+    {
+        if ($photo) {
+            return Storage::url($photo);
+        }
+
+        return null;
     }
 }
